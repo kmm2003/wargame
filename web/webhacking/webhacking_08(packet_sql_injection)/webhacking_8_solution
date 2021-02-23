@@ -1,0 +1,43 @@
+php 코드 해석
+
+getenv('HTTP_USER_AGENT') ==> request 패킷의 user agent 정보를 가져온다
+trim() ==> 공백제거
+
+즉, agent에 공백을 제거한 user-agent 정보를 저장한다
+
+agent에는 from이 들어가면 안된다
+
+select count(id) from chall8 ==> chall8 table에서 id의 갯수를 뽑아낸다
+
+id갯수가 70개 이상이면 table 삭제 시킨다
+
+$_SERVER['HTTP_USER_AGENT'] == getenv('HTTP_USER_AGENT')
+
+addslashes() ==> 겁나 좋은기능이였는데 찾아봐봐
+
+select id from chall8 where agent='".addslashes($_SERVER['HTTP_USER_AGENT'])."' 
+==> agent 정보에 따른 id값 select
+
+id가 admin이면 문제 해결된다 <== 목표
+
+그러나 id가 없으면 새로운 정보를 table에 저장한다.
+==> insert into chall8(agent,ip,id) values('{$agent}','{$ip}','guest')
+
+insert into chall8(agent,ip,id) values('abc','123','admin'),('1234','{$ip}','guest')
+
+table에 레코드가 생성되는 쿼리문을 위와 같이 수정하면 id값이 admin인 레코드를 생성할 수있다.
+버프스위트를 이용해 패킷을 바꿔 전송하여 레코드를 생성해보겠다. 수정할 user-agent정보는 아래와 같다.
+
+$user-agent == abc','123','admin'),('1234
+
+위와 같이 수정하여 패킷을 전송하였더니 done!(2/70)으로 뜨면서 레코드가 하나 새로 추가되었음을
+보여주고있다. 
+
+이번에는 admin을 select하기 위해 에이전트 정보를 abc로 수정하여 패킷을 다시 전송해보겠다.
+
+클리어!!
+
+
+
+
+

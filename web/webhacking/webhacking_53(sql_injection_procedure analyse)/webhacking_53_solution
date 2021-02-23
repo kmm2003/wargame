@@ -1,0 +1,20 @@
+answer이라는 파라미터 값이 $hidden_table 이라는 변수값과 같이 같으면 문제가 해결된다.
+
+val이라는 파라미터를 통해 sql문을 질의할수있는데 select,by가 필터링되어있다.
+
+select a from $hidden_table where a={$_GET['val']}
+
+위 쿼리를 실행 할 수 있는데 위 쿼리를 통해 알 수 있는 것은 $hidden_table이라는 변수는 테이블 이름이며 이것을 구해야 된다.
+
+select를 이용하지 못하는 상황에서 어떻게 테이블명을 알아낼까 찾아보던중 
+procedure analyse()라는 함수를 발견했다.
+이 함수는 현재 칼럼에 대한 데이터베이스,테이블,칼럼에 대한 정보를 알려주는 명령어이다. 따라서 이것을 통해 테이블명을 알 수있다.
+
+select a from $hidden_table where a=1 procedure analyse()
+
+위와 같이 쿼리를 짜고 보내보았다.
+
+클리어!
+
+
+

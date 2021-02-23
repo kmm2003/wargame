@@ -1,0 +1,17 @@
+문제를 보면 여러개의 폼이 나와있으며 제한시간은 2초라는 말이 나와있다.
+
+소스코드를 보면 각폼에 아무 값도 입력하지 않을시에는 focus가 return 되며 ck()함수의 실행이 종료된다.
+
+즉, 이 문제는 2초만에 각 폼에 값을 전부다 넣고 captcha 폼에는 오른쪽에 써있는 captcha_폼의 값과 같은 값을 
+submit 해야 해결되는 문제이다.
+
+우선 먼저 드는 생각은 자바스크립트 소스를 짜서 2초안에 console창에 소스를 넣어 위 조건을 해결하는 것이다.
+
+document.getElementsByName('id')[0].value='a';
+document.getElementsByName('cmt')[0].value='a';
+document.getElementsByName('captcha')[0].value=document.getElementsByName('captcha_')[0].value;
+ck();
+
+위와 같은 자바스크립트 소스를 짜보았고 한번 해보겠다.
+
+클리어!!

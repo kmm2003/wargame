@@ -1,0 +1,14 @@
+**miniconda3 설치경로 설정하는 법**
+
+Miniconda3 will now be installed into this location:
+/tmp/guest-btcaoh/miniconda3
+
+  - Press ENTER to confirm the location
+  - Press CTRL-C to abort the installation
+  - Or specify a different location below
+
+[/tmp/guest-btcaoh/miniconda3] >>> miniconda //여기에 설치할 폴더명을 적으면 자동으로 /tmp/web-py 경로로 설치된다. 여기서는 miniconda라고 설정함
+PREFIX=/tmp/web-py/miniconda
+Unpacking payload ...
+Collecting package metadata (current_repodata.json): done                                                                            
+Solving environment: done

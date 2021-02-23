@@ -1,0 +1,44 @@
+테이블 형태로 join과 login을 할 수 있게 되어있다.
+
+소스를 보니 두개의 if문으로 나누어져있는데 각각 봐보자
+1. lid,lphone이라는 두 개의 데이터가 전달되며
+select id,lv from chall59 where id='{$_POST['lid']}' and phone='{$_POST['lphone']}'
+
+위 쿼리문을 실행한다.
+
+이때 lv값이 admin이면 문제가 해결된다.
+
+2. id,phone이라는 두 개의 데이터가 전달되는데
+phone의 길이가 20자리 이상이면 안되며 admin,0x,#,hex,char,ascii,ord,select를 필터링하고
+id는 admin을 필터링한다.
+
+insert into chall59 values('{$_POST['id']}',{$_POST['phone']},'guest')
+
+마지막으로 위 쿼리를 실행해 테이블에 레코드를 추가해준다.
+
+lid,lphone은 login의 데이터이며 id,phone은 join의 데이터이다.
+
+문제의 의도는 2번을 이용해 admin의 레코드를 생성 후 1번을 이용해 문제를 해결하는 것이라고 추측해볼 수 있다.
+
+insert into chall59 values('nimda',1,reverse(id))-- ,'guest')
+
+위와 같이 쿼리를 짜볼 수 있으며 reverse함수를 이용해 admin을 필터링한 것을 우회 할 수 있다.
+
+nimda / 1,reverse(id))--  ==> join 
+nimda / 1 ==> login
+
+위와 같이 입력하여 가입후 로그인 해보았다.
+
+?????? 안된다???????
+
+왜 안되는지 모르겠어서 웹서핑을 해보니 -- 뒤에 공백이 하나 없으면 문제가 해결이 안된다고 한다..?
+
+해보겠다.
+
+클리어...?!!
+
+마무리가 좀 어이없는 문제였다. 왜 공백이 있어야 하는지 이유는 아직 모르겠다.
+
+
+
+

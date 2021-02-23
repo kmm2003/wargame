@@ -1,0 +1,29 @@
+* 리눅스 현재 사용계정확인
+id
+
+*어셈블리어 문법 인텔형식으로 변경
+set disassembly-flavor intel
+
+*gdb peda
+source /usr/share/peda/peda.py
+
+*peda run 후 코드,레지스터,스택 상태확인
+context code, context register, context stack
+
+*gdb breakpoint
+b *main+32 ==> main+32에 breakpoint 생성 
+(참고로 main+32 코드 실행전에 멈춤)
+
+c ==> breakpoint 다음 breakpoint까지 명령 실행
+
+info breakpoints ==> 생성된 breakpoints 확인
+
+d [num] ==> info breakpoints 로 확인한 [num]에 해당되는 breakpoint 삭제
+
+* x/x 관련 명령어
+x/x -> 16진수로 출력
+x/xw -> 16진수 8바이트 단위로 출력
+x/24xw -> 16진수8바이트 단위로 24개 출력
+x/s -> 문자열로 출력
+x/i -> 어셈블리어 명령어 출력
+

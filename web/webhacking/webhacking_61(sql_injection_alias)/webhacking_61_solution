@@ -1,0 +1,66 @@
+소스를 보자
+
+id파라미터 값이 존재안하면 id파라미터값에 guest를 할당한다.
+
+id파라미터를 addslashes() 함수처리 해주며
+(,),select,from,',',by,'.'을 대소문자 구분없이 필터링 한다.
+또한 id파라미터값의 길이가 15보다 크면 필터링된다.
+
+select {$_GET['id']} from chall61 order by id desc limit 1
+
+마지막으로 위의 쿼리를 실행하며
+출력된 레코드값이 admin이면 클리어된다.
+
+여기서 주의해야 될 것은 우리가 입력하는 값은 속성의 값이아니라 속성명을 입력한다는 것이다.
+
+id=id를 입력해보니 test라는 문구가 뜬다.
+
+아마 테이블에 존재하는 id 속성의 값을 내림차순으로 정렬했을때 최상단에 위치하는 값이
+test라고 추측할 수 있다.
+
+우선 select를 쓰지 못하기 때문에 무작정 admin이라는 값을 대입하는 것은 힘들 것 같다.
+라고 생각했으나 아래와 같은 방법이라면 어떨까?
+
+select 'admin' as id from chall61 order by id desc limit 1
+
+위와 같이 alias를 이용한 쿼리를 실행하면
+-------
+  id
+-------
+ admin
+
+위와 같은 테이블이 출력되어 문제가 해결될 것이다.
+
+참고로 
+
+select 'admin' from chall61 order by id desc limit 1
+위 쿼리를 실행하면
+------
+admin
+------
+admin
+
+위와 같은 테이블이 출력된다.
+
+다시 본론으로 돌아가서
+select 'admin' as id from chall61 order by id desc limit 1
+위 쿼리를 실행해보려했으나
+
+정규표현식에 의해 '가 막히면서 안된다...
+
+따라서 'admin'을 16진수로 바꿔서 표현해보았다.
+select 0x61646D696E as id from chall61 order by id desc limit 1
+위와 같이 전송해보자!
+
+근데.......접근금지라고 뜬다...왜 그런가 봤더니 문자가 필터링 걸린것은 아니고 15자리가 이상이여서 그런것 같다...흐미....ㅈㅈ..
+
+좀 더 알아보니 as의 경우 생략하고 사용이 가능하다고 한다!!! 대박!!
+
+0x61646D696E%20id
+위와 같이 select부분을 바꿔볼 수 있겠다!!(정확히 15자리 개꿀 ㅋㅋ)
+
+id값으로 전송해보니...
+
+클리어!! 
+
+

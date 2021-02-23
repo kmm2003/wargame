@@ -1,0 +1,45 @@
+힌트를 보니 숙제로 lotto program을 만들었다고 한다.
+
+문제에 접속하니 역시나 lotto , lotto.c가 주어져있다.
+
+lotto.c의 소스를 보자
+1. 입력값에 따라 다른 함수를 실행한다.(1=>play(), 2=>help(), 3=>종료)
+
+play()
+1. read()를 통해 submit[6]의 값을 입력받는다.
+2. /dev/urandom 파일을 열고 fd에 저장
+3. 파일을 열때 에러가 발생하면 프로그램 종료
+4. lotto[6]을 선언 후 /dev/urandom에 있는 값을 6바이트만큼 lotto[6]에 넣는다.
+5. lotto[6] 배열을 대상으로 각각의 값을 lotto[i] = (lotto[i] % 45) + 1; 진행
+6. lotto[6] 와 submit[6] 의 값이 순서 상관없이 모두 다른 값으로 같다면 클리어! 
+
+0x602088 submit[6]
+0x400bba /dev/urandom
+
+
+main()
+-----------
+ret
+fpo
+menu ebp-4
+
+play()
+-----------
+ret
+fpo 
+lotto[6] ebp-16
+fd ebp-20
+match ebp-32
+
+
+system 함수 시작 주소  ==> 0x40098b
+
+"\x01\x00\x00\x00"+"\x00\x00\x00\x00"+"\x8b\x09\x40\x00" | ./lotto
+
+ssh lotto@pwnable.kr -p2222
+
+* 참고자료
+fflush() 관련 좋은 글
+=> https://moolgogiheart.tistory.com/72
+
+

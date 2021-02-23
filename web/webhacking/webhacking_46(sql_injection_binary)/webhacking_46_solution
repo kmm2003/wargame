@@ -1,0 +1,16 @@
+소스를 보자
+
+폼에 입력한 값이 lv라는 파라미터의 값으로 전달된다.
+이때 lv파라미터는 addslashes 되며 공백, /, *,% 는 모두 치환되어 사라진다.
+
+그 후 정규표현식에 의해 select,0x,limit,cash가 필터링되며
+select id,cash from chall46 where lv=$_GET[lv]
+위 쿼리를 실행후 lv값에 대한 id,cash값을 클라이언트에 출력해준다.
+이때 id값이 admin이면 문제가 해결된다.
+
+select id,cash from chall46 where lv=0%09or%09id=0b110000101100100011011010110100101101110
+
+위의 쿼리문과 같이 or문과 함께 id값에 admin을 넣어 admin의 id와 cash를 출력하는 방법을 사용하였는데 이때 ''는 addslashes 때문에 안되고 16진수는 정규표현식에서 필터링에 걸려서 안되기 때문에 admin값을 2진수로 바꾸어서 값을 넣어주었다.(python으로 16진수 -> 10진수 -> 2진수 순서로 변환함)
+
+클리어!!
+

@@ -1,0 +1,38 @@
+phone이라는 문구와 함께 form이 주어져있다. 아무값이나 넣어보니 phone, id라는 파라미터 값이 전송되는 것을 확인할 수 있으며 id는 guest라는 값이 전달되는 것을 확인할 수 있다.
+
+소스코드를 확인해보자
+
+소스를 확인해보니 첫번째 if문에서는 phone,id 파라미터가 모두 값이 존재하는지 검증후 존재할 경우
+: *,/,=,select,-,#,; 을 필터링하며 동시에 id길이가 5글자 이상인 경우도 필터링한다.
+  id값으로 admin이 들어가는 경우도 필터링되며 이 3가지 필터링을 모두 통과하면
+insert into chall35(id,ip,phone) values('{$_GET['id']}','{$_SERVER['REMOTE_ADDR']}',{$_GET['phone']})
+위와 같은 쿼리문을 통해 chall35 테이블에 새로운 레코드를 추가해준다.
+새로운 레코드에는 id,phone,클라이언트 ip값이 저장된다.
+
+그 후 if문을 빠져나오면 
+select ip from chall35 where id='admin' and ip='{$_SERVER['REMOTE_ADDR']}'
+위 쿼리를 통해 ip값을 select 하여 $isAdmin이라는 변수에 저장한다.
+select된 ip값이 클라이언트이 ip와 같으면 문제가 해결된다.
+
+그 후 코드를 더 살펴보면 
+select * from chall35 where ip='{$_SERVER['REMOTE_ADDR']}'
+위 쿼리문을 통해 ip별 레코드를 출력해주며 이것을 $phone_list라는 변수에 저장한다.
+그후 select한 레코드의 id,phone 내용을 출력해준다.
+
+코드를 전부 살펴보았는데 여기서 가장핵심인 것은 역시 
+select ip from chall35 where id='admin' and ip='{$_SERVER['REMOTE_ADDR']}'
+위 쿼리이며 위 쿼리를 통해 ip값이 클라이언트의 ip일 경우 문제가 클리어된다는 것이다.
+
+근데 여기서 문제는 위 쿼리에서 우리가 원하는 레코드가 출력되려면 맨위쪽 코드에서 id는 admin으로 해서 레코드를 생성해주어야 하는데 문제는 admin을 필터링하기 때문에 골치 아파진다.
+
+우선 가장 먼저드는 생각은 insert문으로 새로운 레코드를 생성해주는 구문이 있는데 여기서 phone부분을 변조하여 내가 원하는 id가 admin인 레코드를 생성해보는 방법이다. 한번 쿼리를 짜보자
+
+id=guest / phone=1234),('admin','x.x.x.x',4321
+
+위와 같이 phone파라미터의 쿼리를 변환하면 
+insert into chall35(id,ip,phone) values('guest','x.x.x.x',1234),('admin','211.106.76.247',4321)
+
+위와 같이 쿼리문이 변조되어 원하는 레코드를 생성하게 된다 값을 입력해보자.
+
+클리어!! 갸 꿀
+

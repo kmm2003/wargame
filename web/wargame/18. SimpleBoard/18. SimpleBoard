@@ -1,0 +1,49 @@
+힌트를 보면 union sqli 문제라고 하며 아마 우리가 스크립트를 사용할 것이라고 한다.
+
+문제에 접속해보니 테이블 하나와 소스가 주어져있다.
+
+소스를 보니 클래스 형식으로 DB와 Board 두개의 클래스가 주어져있으며
+
+Board 클래스를 보면 
+1. 테이블 레코드를 누르면 누른 레코드에 대한 정보 출력과 함께 hit값이 증가하는데 이때 view라는 쿠키생성
+2. view라는 쿠키가 있을때는 레코드를 눌러도 hit값이 증가하지 않는다.
+3. list를 누르면 테이블 idx 내림차순으로 보여줌
+
+1을 보면 이때, select * from {$this->table} where idx=$idx 
+위 쿼리를 실행 후 데이블 정보를 출력하게 되는데 여기서 union sql injection을 시도해보자
+
+테이블의 레코드 정보로 출력되는 값이 4가지 임으로 속성의 갯수가 4개라고 추측해볼 수 있다.
+
+select * from {$this->table} where idx=$idx union select 1,2,3,4
+
+위 쿼리를 이용하여 시도해보니 "query error" 라는 문구가 출력된다.
+혹시나 속성의 갯수가 잘 못 됐나 해서 1~100까지 해보았는데도 똑같은 문구가 뜬다....
+
+소스를 보니 "query error"라는 문구는 쿼리가 정상적으로 실행되지않았을 시에 발생하게 되는데
+소스아래쪽을 자세히 봐보니 쿠키 strpos 문구를 통해 /$idx 값이 view 쿠키에 들어가는지 확인하고
+hit 값을 증가시키기 위해 
+update {$this->table} set hit = hit+1 where idx=$idx
+위 쿼리를 실행시키는 것을 알 수 있다. 
+즉, 위 쿼리를 실행할때 에러가 발생하여 "query error"가 발생한 것이고 
+따라서 union sql injection을 하기전에 우리가 넣을 값을 view 쿠키에 넣어주어야 에러가 뜨지않는다.
+
+view 쿠키를 확인해보니 	r%2F1%2F2 라는 값이 들어있었으며 %2f는 /을 의미함으로
+/1/2 즉, idx 값이 1,2인 레코드를 확인했었음을 증명하고 있다. 여기에 우리가 넣을 값에 대한 증명을 넣어주면 된다.
+
+코드를 위에 설명한 방식대로 짜서 전송해보니 성공적이다. 예상했던대로 속성의 갯수는 4개였다!
+(table_length and name.py)
+
+이제 union sql injection 취약점이 있음을 알았음으로 flag값을 구해보면되겠다.
+
+먼저 테이블 이름부터 구해보니
+README , SimpleBoard
+두 개의 테이블이 나왔다.(table.py)
+
+README라는 테이블에 아마 flag값이 들어있을 것 같다.
+구해보니 README 테이블의 속성을 구해보니 (column.py)
+
+flag라는 속성이 존재한다!
+
+README 테이블에서 flag 속성값을 출력해보자! (flag.py)
+
+클리어!

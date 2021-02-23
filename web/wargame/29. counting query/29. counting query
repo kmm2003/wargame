@@ -1,0 +1,77 @@
+힌트를 보니 error based sql injection 이라고 한다.
+
+문제에 접속하니 소스와 로그인 창이 구현되어있다.
+
+소스를 보니
+1. post를 통해 id,pw,type값을 보내고있으며 mysql_real_escape_string() 처리해주고 있다.
+$ip변수에 클라이언트의 ip값을 넣어주고 있으며 이 값이 id와 같아야 한다.
+
+2. 그 후 select 1 from all_user_accounts where user_id='$id'
+위 쿼리를 실행 해 $id값이 DB에 존재하는지 확인 후 존재하지않으면 DB에 $id정보를 추가한다.
+
+3. select count(*) from login_count where id='$id'
+위 쿼리를 실행하여 $id의 사용자가 로그인한 횟수를 반환하고 4회 이상이면 
+로그인한 횟수를 초기화 하고 uniq_id를 바꾸고 에러를 출력한다.
+
+4. create temporary table t_user as select * from all_user_accounts where user_id='$id'로 t_user 라는 임시테이블을 생성하여 다른값에 접근하지 못하도록 하고있다.
+
+5. 그 후 $id가 로그인했다는 기록을 남기고 카운팅하며
+
+6. "select * from t_user where user_id='$id' and ps='$ps' and type=$type"
+위 쿼리를 실행하여 유저의 정보를 반환 후 반환값을 $result변수에 넣는다. (false일시 에러출력)
+
+7. user_id값이 존재하면 이 값을 출력하고 
+select ps from t_user where user_id='$id' and ps='$ps'
+아까 생성한 임시테이블에 관한 쿼리를 실행해 ps라는 값을 $row변수에 넣고
+$row의 ps값이 처음 넣은 ps값과 같으면 flag를 반환한다. (ps값은 uniq_id이다.)
+
+코드가 길었는데 
+6번을 보면 $result값 즉, 쿼리반환값이 false이면 mysql_error() 함수를 통해 sql 에러 메시지를 반환한다. 
+
+힌트에서 error based sql injection이라고 한것을 생각해 보았을때 여기가 취약점일 것이라고 예상해 볼 수 있다.
+
+일반적인 방법으로 로그인을 했을때는 
+Login Error :: not found your `user_id` or `password`
+위 에러가 떴지만
+6번의 type 부분을 통해 union injection을 시도해보니 위 에러가 뜨지않고 
+mysql_error()가 떴으며 이를 통해 이 부분이 injection이 가능한 부분임을 알 수 있었다.
+
+구글링을 통해 error based sql injection에 대해 좀 더 검색해보았고 공격 구문을 찾아내 이것을 응용해 공격코드를 만들어보았다.
+공격 구문을 만들때 union을 이용해 뒤에 공격구문을 붙이는 방식으로 만들어보았으나
+t_user 테이블이 임시테이블이라 접근을 할 수가 없었고 다시 구글링해보던중 union이 아닌 or을 이용해 쉽게 ps 속성에 접근 할 수 있음을 깨달았고 다시 공격코드를 짰다. (error_based_injection.py)
+
+-------------------------------------------------------------------------------------------
+공격코드 분석
+
+1번 코드
+1 or row(1,1)>(select count(*),concat(ps,floor(rand(0)*2)) as x from information_schema.tables group by x)
+
+floor()함수는 내림 함수이다. floor(rand(0)*2)는 1이 된다. 
+x값으로 concat(ps,floor(rand(0)*2))가 반환되는데 이때 group by문에서 concat(ps,floor(rand(0)*2))의 값이 당연히 모두값이 같기 때문에 중복되고 따라서 그룹별로 나누지 못해 group by 에러가 발생하게 된다. 이때, 에러가 발생하면서 에러가 발생하게된 속성 즉, concat(ps,floor(rand(0)*2))을 출력한다.
+
+따라서 핵심은
+1 or row(1,1)>(select count(*),concat((구하고 싶은 쿼리문 또는 속성),floor(rand(0)*2)) as x from information_schema.tables group by x limit 1)
+
+위와 같이 코드를 작성하면 group by 에러에 의해 (구하고 싶은 쿼리문 또는 속성)의 값을 에러값으로 출력시킬수 있다.
+-------------------------------------------------------------------------------------------
+
+출처
+https://blog.ch4n3.kr/496
+https://sungpil94.tistory.com/253
+https://velog.io/@woounnan/WEB-Error-Base-SQL-Injection
+
+ps값이 에러를 통해 출력되었고 
+이것을 이용해 로그인을 해보면 flag값이 나올것이다!!
+
+.....???? 로그인이 계속실패해서 왜 그러지 하고 계속 ps값을 출력해보니 
+마지막에 1값이 모두 붙어있는 것을 확인했다.
+혹시나 해서 공격쿼리를 살짝 수정해 information_schema.tables에서 테이블을 검색해보니
+테이블이름 뒤에 1이 붙어있는 것이 확인되었고
+1이 붙어있는 것까지 로그인할때 넣어서 로그인이 안됬다는 것을 깨달았다;;;;
+(1이 붙는 이유는 공격 쿼리에서 floor(rand(0)*2) 값이 1이 반환되기 때문이고
+concat으로 ps와 합쳐지다보니 ps1값이 생성되는 것이다!)
+
+1빼고 다시 로그인해보니..
+
+클리어!!
+

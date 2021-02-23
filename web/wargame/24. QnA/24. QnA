@@ -1,0 +1,38 @@
+힌트를 보니 insert query를 이용한 time sql injection 이라고 한다.
+
+페이지를 보았을때 여러가지 카테고리가 존재하는데 
+이 문제가 sql injection이라는 것을 고려했을때 master에게 메시지를 보내는 to JSMaster 페이지가 취약할 것으로 예상된다.
+
+메시지를 보내는 방식을 보면 post 방식으로 데이터 영역을 통해 mail,cont,type 세 가지의 변수값을 보내고 있다.
+
+insert 쿼리 문제이기 때문에
+우리가 보내는 메시지가 관리자 DB에 저장된다는 것을 예상해 볼 수 있고
+
+insert into(mail,cont,type)value(${mail},${cont},${type})
+
+위와 같은 구문으로 db에 저장될 것을 예측 해볼 수 있다.
+
+insert 구문의 경우 if문을 사용 할 수 있고 if 문을 이용하여 sleep함수를 이용해 time sql injection을 시도해 볼 수 있는데 
+이것을 시도하기 위해서는 sql에서 변수의 type이 int형이어야 한다.
+
+따라서 int형 변수를 찾아보기 위해 각각의 변수에 차례대로 
+if(1,sleep(3.0),1)
+위와 같은 injection 쿼리를 넣어서 전송해 int type의 변수를 찾아보겠다.(1.find_valid_injection.py)
+
+전송 결과 type 변수의 sql type이 int 형이고 여기서 sql injection이 가능하다는 것을 확인했다!
+
+이제 flag값을 얻기 위해 type 변수를 이용해 테이블 부터 구해 보자(2.table.py)
+
+테이블을 구해보니 authkey, message 두개의 테이블이 출력되었다.
+
+이번에는 column을 구해보자 (3.column.py)
+
+column을 구해보니 5개의 column이 나왔는데 그중에서도 authkey라는 속성이 눈에 띈다.
+
+아마 authkey 테이블의 authkey 속성값이 flag값일 것 같다.(4.flag.py)
+
+클리어!
+
+
+
+

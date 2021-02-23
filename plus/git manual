@@ -1,0 +1,22 @@
+git --version
+
+git config --global user.name kmm2003
+git config --global user.email ksy134411@naver.com
+
+git clone https://github.com/kmm2003/web-py.git
+
+-----------------------------------------------------------------------------------------
+
+git add [file]
+
+git commit -m "[title]"
+
+git push
+
+-------------------------------------------------------------------------------------------
+
+git rm [File Name] or git rm --cached [File Name]
+
+git commit -m "[커밋 텍스트]"
+
+git push
