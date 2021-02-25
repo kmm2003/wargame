@@ -27,3 +27,5 @@ x/24xw -> 16진수8바이트 단위로 24개 출력
 x/s -> 문자열로 출력
 x/i -> 어셈블리어 명령어 출력
 
+* gdb peda 관련 참고 글
+https://aceatom.tistory.com/335

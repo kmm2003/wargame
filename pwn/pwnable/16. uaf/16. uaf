@@ -1,8 +1,0 @@
-힌트를 보니 use after free라는 버그에 대해 언급되어있다.
-
-접속을 해보니 uaf.cpp라는 소스가 있다. 소스분석을 해보자.
-1. 
-
-
-*참고자료
-User After Bug => https://nroses-taek.tistory.com/156
