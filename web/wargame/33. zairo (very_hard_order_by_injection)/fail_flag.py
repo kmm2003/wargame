@@ -7,7 +7,7 @@ pivot=int((start+end)/2)
 result=''
 middle=''
 count=0
-for i in range(30):
+for i in range(25):
     if start!=0 or end!=len(tmp)-1:
         print('count error')
         break

